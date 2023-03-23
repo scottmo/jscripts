@@ -32,7 +32,7 @@ var $el = (function() {
         return element;
     }
 
-    function label({ content = '', style = {}, style = {} }) {
+    function label({ content = '', style = {} }) {
         const element = document.createElement('label');
         element.value = content;
         Object.assign(element.style, css.label, style);
