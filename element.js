@@ -1,7 +1,3 @@
-// cdn: https://cdn.jsdelivr.net/gh/scottmo/monkeyscripts@main/element.js
-// purge each update https://www.jsdelivr.com/tools/purge
-// git https://github.com/scottmo/monkeyscripts/blob/main/element.js
-
 var $el = (function() {
     const css = {
         formControl: {
@@ -26,10 +22,41 @@ var $el = (function() {
         label: {
             display: 'inline-block',
             marginBottom: '.5rem',
+        },
+        button: {
+            display: 'inline-block',
+            fontWeight: 400,
+            textAlign: 'center',
+            whiteSpace: 'nowrap',
+            verticalAlign: 'middle',
+            cursor: 'pointer',
+            border: '1px solid transparent',
+            padding: '6px 12px',
+            fontSize: '1rem',
+            lineHeight: '1.5',
+            borderRadius: '4px',
+        },
+        buttonPrimary: {
+            color: '#fff',
+            backgroundColor: '#337ab7',
+            borderColor: '#2e6da4',
+        },
+        buttonSuccess: {
+            color: '#fff',
+            backgroundColor: '#5cb85c',
+            borderColor: '#4cae4c',
+        },
+        buttonError: {
+            color: '#fff',
+            backgroundColor: '#d9534f',
+            borderColor: '#d43f3a',
         }
     };
 
-    function select(selectors) {
+    function query(selectors) {
+        if (typeof selectors === 'object') {
+            return selectors; // already a node
+        }
         if (typeof selectors === 'string') {
             selectors = [selectors];
         }
@@ -42,7 +69,7 @@ var $el = (function() {
         return null;
     }
 
-    function div({ children = [], style = {} }) {
+    function div({ children = [], style = {} } = {}) {
         const element = document.createElement('DIV');
         Object.assign(element.style, style);
         children.forEach(child => element.appendChild(child));
@@ -56,7 +83,7 @@ var $el = (function() {
         return element;
     }
 
-    function textarea({ content = '', placeholder = '', style = {} }) {
+    function textarea({ content = '', placeholder = '', style = {} } = {}) {
         const element = document.createElement('TEXTAREA');
         element.value = content;
         element.placeholder = placeholder;
@@ -64,7 +91,7 @@ var $el = (function() {
         return element;
     }
 
-    function input({ content = '', placeholder = '', style = {} }) {
+    function input({ content = '', placeholder = '', style = {} } = {}) {
         const element = document.createElement('INPUT');
         element.value = content;
         element.placeholder = placeholder;
@@ -72,12 +99,13 @@ var $el = (function() {
         return element;
     }
 
-    function button({ type = 'success', label = 'button', style = {}, onclick }) {
+    function button({ type = 'Primary', label = 'button', style = {}, onclick }) {
         const element = document.createElement('BUTTON');
         element.textContent = label;
         if (typeof onclick === 'function') {
             element.addEventListener('click', onclick);
         }
+        Object.assign(element.style, css.button, css[`button${type}`], style);
         return element;
     }
 
@@ -91,6 +119,8 @@ var $el = (function() {
     }
 
     function makeElementDraggable(element) {
+        element = query(element);
+
         var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
         var header = element.querySelector(".header");
         if (header) {
@@ -135,7 +165,7 @@ var $el = (function() {
         }
     }
 
-    function draggablePanel({titleSymbol = '⚙', title, content, style}) {
+    function draggablePanel({ titleSymbol = '⚙', title, content, style = {} }) {
         const panel = document.createElement('DIV');
         Object.assign(panel.style, {
             zIndex: '998',
@@ -221,6 +251,19 @@ var $el = (function() {
         return panel;
     }
 
+    function panel({ x, y }) {
+        const element = div({
+            style: {
+                position: 'absolute',
+                top: y + 'px',
+                left: x + 'px',
+                zIndex: 999
+            }
+        });
+        document.body.prepend(element);
+        return element;
+    }
+
     async function waitFor(elementSel, interval, maxWaitTimes) {
         return new Promise(resolve => {
             let waitTime = 0;
@@ -236,20 +279,22 @@ var $el = (function() {
     }
 
     function fireEvent(element, eventName) {
-        var event = new Event(eventName, { bubbles: true});
+        element = query(element);
+        const event = new Event(eventName, { bubbles: true});
         event.simulated = true;
         element.dispatchEvent(event);    
     }
 
     function type(element, value) {
+        element = query(element);
         Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set.call(element, value);
         fireEvent(element, "input");
         fireEvent(element, "change");
     }
 
     return {
-        select,
-        div, input, button, label, textarea, a, draggablePanel,
+        query,
+        div, input, button, label, textarea, a, draggablePanel, panel,
         makeElementDraggable, waitFor, fireEvent, type
     }
 })();
