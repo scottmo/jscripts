@@ -1,3 +1,7 @@
+// cdn: https://cdn.jsdelivr.net/gh/scottmo/monkeyscripts@main/element.js
+// purge each update https://www.jsdelivr.com/tools/purge
+// git https://github.com/scottmo/monkeyscripts/blob/main/element.js
+
 var $el = (function() {
     const css = {
         formControl: {
@@ -24,6 +28,19 @@ var $el = (function() {
             marginBottom: '.5rem',
         }
     };
+
+    function select(selectors) {
+        if (typeof selectors === 'string') {
+            selectors = [selectors];
+        }
+        for (let sel of selectors) {
+            const elm = document.querySelector(sel);
+            if (elm) {
+                return elm;
+            }
+        }
+        return null;
+    }
 
     function div({ children = [], style = {} }) {
         const element = document.createElement('DIV');
@@ -204,8 +221,35 @@ var $el = (function() {
         return panel;
     }
 
+    async function waitFor(elementSel, interval, maxWaitTimes) {
+        return new Promise(resolve => {
+            let waitTime = 0;
+            var pid = setInterval(function() {
+                let element = document.querySelector(elementSel);
+                if (element || waitTime >= maxWaitTimes) {
+                    clearInterval(pid);
+                    resolve(element);
+                }
+                waitTime++;
+            }, interval);
+        });
+    }
+
+    function fireEvent(element, eventName) {
+        var event = new Event(eventName, { bubbles: true});
+        event.simulated = true;
+        element.dispatchEvent(event);    
+    }
+
+    function type(element, value) {
+        Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set.call(element, value);
+        fireEvent(element, "input");
+        fireEvent(element, "change");
+    }
+
     return {
+        select,
         div, input, button, label, textarea, a, draggablePanel,
-        makeElementDraggable,
+        makeElementDraggable, waitFor, fireEvent, type
     }
 })();
