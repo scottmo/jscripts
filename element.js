@@ -39,7 +39,7 @@ var $el = (function() {
         return element;
     }
 
-    function textArea({ content = '', placeholder = '', style = {} }) {
+    function textarea({ content = '', placeholder = '', style = {} }) {
         const element = document.createElement('TEXTAREA');
         element.value = content;
         element.placeholder = placeholder;
