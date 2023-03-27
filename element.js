@@ -1,120 +1,30 @@
 var $el = (function() {
-    const css = {
-        formControl: {
-            display: 'block',
-            width: '100%',
-            padding: '.375rem .75rem',
-            fontSize: '1rem',
-            fontWeight: '400',
-            lineHeight: '1.5',
-            color: '#212529',
-            backgroundColor: '#fff',
-            backgroundClip: 'padding-box',
-            border: '1px solid #ced4da',
-            appearance: 'none',
-            borderRadius: '.25rem',
-            transition: 'border-color .15s ease-in-out, box-shadow .15s ease-in-out',
-        },
-        textArea: {
-            minHeight: 'calc(1.5em + .75rem + 2px)',
-            resize: 'vertical'
-        },
-        label: {
-            display: 'inline-block',
-            marginBottom: '.5rem',
-        },
-        button: {
-            display: 'inline-block',
-            fontWeight: 400,
-            textAlign: 'center',
-            whiteSpace: 'nowrap',
-            verticalAlign: 'middle',
-            cursor: 'pointer',
-            border: '1px solid transparent',
-            padding: '6px 12px',
-            fontSize: '1rem',
-            lineHeight: '1.5',
-            borderRadius: '4px',
-        },
-        buttonPrimary: {
-            color: '#fff',
-            backgroundColor: '#337ab7',
-            borderColor: '#2e6da4',
-        },
-        buttonSuccess: {
-            color: '#fff',
-            backgroundColor: '#5cb85c',
-            borderColor: '#4cae4c',
-        },
-        buttonError: {
-            color: '#fff',
-            backgroundColor: '#d9534f',
-            borderColor: '#d43f3a',
-        }
-    };
-
     function query(selectors) {
-        if (typeof selectors === 'object') {
-            return selectors; // already a node
-        }
         if (typeof selectors === 'string') {
             selectors = [selectors];
         }
-        for (let sel of selectors) {
-            const elm = document.querySelector(sel);
-            if (elm) {
-                return elm;
+        if (Array.isArray(selectors)) {
+            for (let sel of selectors) {
+                const elm = document.querySelector(sel);
+                if (elm) {
+                    return elm;
+                }
             }
+            return null;
+        }
+        if (typeof selectors === 'object') {
+            return selectors; // already a node
         }
         return null;
     }
 
-    function div({ children = [], style = {} } = {}) {
-        const element = document.createElement('DIV');
-        Object.assign(element.style, style);
-        children.forEach(child => element.appendChild(child));
-        return element;
-    }
-
-    function label({ content = '', style = {} }) {
-        const element = document.createElement('label');
-        element.value = content;
-        Object.assign(element.style, css.label, style);
-        return element;
-    }
-
-    function textarea({ content = '', placeholder = '', style = {} } = {}) {
-        const element = document.createElement('TEXTAREA');
-        element.value = content;
-        element.placeholder = placeholder;
-        Object.assign(element.style, css.formControl, css.textArea, style);
-        return element;
-    }
-
-    function input({ content = '', placeholder = '', style = {} } = {}) {
-        const element = document.createElement('INPUT');
-        element.value = content;
-        element.placeholder = placeholder;
-        Object.assign(element.style, css.formControl, style);
-        return element;
-    }
-
-    function button({ type = 'Primary', label = 'button', style = {}, onclick }) {
-        const element = document.createElement('BUTTON');
-        element.textContent = label;
-        if (typeof onclick === 'function') {
-            element.addEventListener('click', onclick);
-        }
-        Object.assign(element.style, css.button, css[`button${type}`], style);
-        return element;
-    }
-
-    function a({ href, label = href, target = '_blank', style = {} }) {
-        const element = document.createElement("a");
-        element.setAttribute("href", href);
-        element.setAttribute("target", target);
-        element.textContent = label;
-        Object.assign(element.style, style);
+    function create(html) {
+        const element = document.createElement("DIV");
+		element.innerHTML = html;
+        const ids = [...html.matchAll(/\sid=['"](\w+)["']/g)].map(matchArr => matchArr[1]);
+        ids.forEach(id => {
+            element["$" + id] = element.querySelector("#" + id);
+        });
         return element;
     }
 
@@ -122,7 +32,8 @@ var $el = (function() {
         element = query(element);
 
         var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        var header = element.querySelector(".header");
+        var headerSelector = `.${element.id}-header`;
+        var header = document.querySelector(headerSelector);
         if (header) {
             // if present, the header is where you move the DIV from:
             header.onmousedown = dragMouseDown;
@@ -130,7 +41,7 @@ var $el = (function() {
             // otherwise, move the DIV from anywhere inside the DIV:
             element.onmousedown = dragMouseDown;
         }
-
+    
         function dragMouseDown(e) {
             e = e || window.event;
             e.preventDefault();
@@ -142,7 +53,7 @@ var $el = (function() {
             document.onmousemove = elementDrag;
             element.dragged = 0;
         }
-
+    
         function elementDrag(e) {
             e = e || window.event;
             e.preventDefault();
@@ -152,12 +63,12 @@ var $el = (function() {
             pos3 = e.clientX;
             pos4 = e.clientY;
             // set the element's new position:
-            element.style.top = (element.offsetTop - pos2) + 'px';
-            element.style.left = (element.offsetLeft - pos1) + 'px';
-
+            element.style.top = (element.offsetTop - pos2) + "px";
+            element.style.left = (element.offsetLeft - pos1) + "px";
+    
             element.dragged += pos1 + pos2;
         }
-
+    
         function closeDragElement() {
             // stop moving when mouse button is released:
             document.onmouseup = null;
@@ -165,89 +76,56 @@ var $el = (function() {
         }
     }
 
-    function draggablePanel({ titleSymbol = '⚙', title, content, style = {} }) {
-        const panel = document.createElement('DIV');
-        Object.assign(panel.style, {
-            zIndex: '998',
-            position: 'absolute',
-            transition: 'all 0.5s cubic-bezier(0.55, 0.055, 0.675, 0.19) 0s',
-            transform: 'translate3d(0px, 0px, 0px)',
-            top: '20px',
-            left: '20px',
-        }, style.panel);
+    function draggablePanel({ id, title, content }) {
+        const panel = create(`
+            <div id="header" class="${id}-header">${title}</div>
+            <div id="body" class="${id}-body"></div>
+        `);
+        panel.$header.setAttribute('style', `
+            z-index: 999;
+            background-color: #2196F3; 
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 5px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 1px 5px 0 rgb(0 0 0 / 20%);
+        `);
+        panel.$body.setAttribute('style', `
+            padding: 5px;
+        `);
+        panel.$body.appendChild(content);
 
-        const header = document.createElement('DIV');
-        header.setAttribute('class', 'header');
-        Object.assign(header.style, {
-            zIndex: '999',
-            backgroundColor: '#2196F3',
-            color: '#fff',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            boxShadow: '0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 1px 5px 0 rgb(0 0 0 / 20%)',
-        }, style.header);
-        panel.appendChild(header);
-
-        const body = document.createElement('DIV');
-        body.setAttribute('class', 'body');
-        body.appendChild(content);
-        Object.assign(body.style, style.body);
-        panel.appendChild(body);
-
-        function togglePanel(isVisible) {
-            if (isVisible) {
-                Object.assign(header.style, {
-                    borderRadius: '0',
-                    height: '100%',
-                    width: '100%',
-                    pointer: 'move',
-                    fontSize: '14px',
-                    lineHeight: '25px',
-                }, style.header);
-                setTimeout(() => {
-                    header.textContent = title;
-                }, 500);
-
-                Object.assign(body.style, {
-                    padding: '5px',
-                    height: '300px',
-                    width: '300px',
-                    overflow: 'auto',
-                }, style.body);
-
-                panel.style.boxShadow = '0 4px 8px 0 rgba(0,0,0,0.2)';
-            } else {
-                Object.assign(header.style, {
-                    borderRadius: '50%',
-                    height: '40px',
-                    width: '40px',
-                    cursor: 'pointer',
-                    fontSize: '40px',
-                    lineHeight: '40px',
-                });
-                header.textContent = titleSymbol;
-
-                Object.assign(body.style, {
-                    padding: '0px',
-                    height: '0px',
-                    width: '0px',
-                    overflow: 'hidden',
-                });
-
-                panel.style.boxShadow = 'none';
-            }
+        panel.setAttribute('id', id);
+        panel.setAttribute('style', `
+            z-index: 998;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            background-color: white;
+        `);
+    
+        let isVisible = true;
+        panel.togglePanel = (forceVisible) => {
+        	if (forceVisible != null) {
+        		isVisible = forceVisible;
+        	} else {
+        		isVisible = !isVisible;
+        	}
+            panel.$body.style.display = isVisible ? 'block' : 'none';
         }
-
-        header.addEventListener('click', function() {
+    
+        panel.$header.addEventListener('click', function(event) {
             if (panel.dragged !== 0) return;
-            togglePanel(body.style.overflow === 'hidden');
+            panel.togglePanel();
         });
-
-        togglePanel(false);
-
+        panel.togglePanel(false);
+    
         document.body.appendChild(panel);
         makeElementDraggable(panel);
-
+    
         return panel;
     }
 
@@ -292,9 +170,17 @@ var $el = (function() {
         fireEvent(element, "change");
     }
 
+    function includeBootstrapCSS() {
+        var bootstrapCSS = document.createElement("link");
+        bootstrapCSS.setAttribute("rel", "stylesheet");
+        bootstrapCSS.setAttribute("href", "https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css");
+        bootstrapCSS.setAttribute("integrity", "sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu");
+        bootstrapCSS.setAttribute("crossorigin", "anonymous");
+        document.head.prepend(bootstrapCSS);    
+    }
+
     return {
-        query,
-        div, input, button, label, textarea, a, draggablePanel, panel,
-        makeElementDraggable, waitFor, fireEvent, type
+        query, includeBootstrapCSS, create, draggablePanel, panel,
+        makeElementDraggable, waitFor, fireEvent, type,
     }
 })();
