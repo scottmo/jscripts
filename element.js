@@ -28,7 +28,7 @@ var $el = (function() {
         const ids = [...html.matchAll(/\sid=['"](\w+)["']/g)].map(matchArr => matchArr[1]);
         ids.forEach(id => {
             element["$" + id] = element.querySelector("#" + id);
-            element["$" + id].setAttribute("id", id + "-" + uuidv4());
+            element["$" + id].setAttribute("id", id + "-" + uniqueId());
         });
         return element;
     }
@@ -87,7 +87,12 @@ var $el = (function() {
         );
     }
 
-    function createPanel(title, content, { id = uuidv4(), isDraggable = true, x = 20, y = 20, isCollapsed = true } = {}) {
+    function uniqueId() {
+        // add prefix to make selector valid
+        return "el" + uuidv4().substring(0, 4);
+    }
+
+    function createPanel(title, content, { id = uniqueId(), isDraggable = true, x = 20, y = 20, isCollapsed = true } = {}) {
         const panel = create(`
             <div id="header" class="${id}-header">${title}</div>
             <div id="body" class="${id}-body"></div>
@@ -180,7 +185,7 @@ var $el = (function() {
     }
 
     return {
-        query, includeBootstrapCSS, create, draggablePanel: createPanel,
+        query, includeBootstrapCSS, create, createPanel,
         makeElementDraggable, waitFor, fireEvent, type,
     }
 })();
