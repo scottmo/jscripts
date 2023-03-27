@@ -1,7 +1,3 @@
-// cdn: https://cdn.jsdelivr.net/gh/scottmo/monkeyscripts@main/element.js
-// purge each update https://www.jsdelivr.com/tools/purge
-// git https://github.com/scottmo/monkeyscripts/blob/main/element.js
-
 var $el = (function() {
     function query(selectors) {
         if (typeof selectors === 'string') {
@@ -28,6 +24,7 @@ var $el = (function() {
         const ids = [...html.matchAll(/\sid=['"](\w+)["']/g)].map(matchArr => matchArr[1]);
         ids.forEach(id => {
             element["$" + id] = element.querySelector("#" + id);
+            element["$" + id].setAttribute("id", id + "-" + uuidv4());
         });
         return element;
     }
@@ -80,7 +77,13 @@ var $el = (function() {
         }
     }
 
-    function draggablePanel({ id, title, content }) {
+    function uuidv4() {
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    }
+
+    function createPanel(title, content, { id = uuidv4(), isDraggable = true, x = 20, y = 20, isVisible = false } = {}) {
         const panel = create(`
             <div id="header" class="${id}-header">${title}</div>
             <div id="body" class="${id}-body"></div>
@@ -105,8 +108,8 @@ var $el = (function() {
         panel.setAttribute('style', `
             z-index: 998;
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: ${x}px;
+            left: ${y}px;
             box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
             background-color: white;
         `);
@@ -125,11 +128,13 @@ var $el = (function() {
             if (panel.dragged !== 0) return;
             panel.togglePanel();
         });
-        panel.togglePanel(false);
-    
+        panel.togglePanel(isVisible);
+
+        if (isDraggable) {
+            makeElementDraggable(panel);
+        }
+
         document.body.appendChild(panel);
-        makeElementDraggable(panel);
-    
         return panel;
     }
 
@@ -171,7 +176,7 @@ var $el = (function() {
     }
 
     return {
-        query, includeBootstrapCSS, create, draggablePanel,
+        query, includeBootstrapCSS, create, draggablePanel: createPanel,
         makeElementDraggable, waitFor, fireEvent, type,
     }
 })();
