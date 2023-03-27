@@ -1,3 +1,7 @@
+// cdn: https://cdn.jsdelivr.net/gh/scottmo/monkeyscripts@main/element.js
+// purge each update https://www.jsdelivr.com/tools/purge
+// git https://github.com/scottmo/monkeyscripts/blob/main/element.js
+
 var $el = (function() {
     function query(selectors) {
         if (typeof selectors === 'string') {
@@ -129,19 +133,6 @@ var $el = (function() {
         return panel;
     }
 
-    function panel({ x, y }) {
-        const element = div({
-            style: {
-                position: 'absolute',
-                top: y + 'px',
-                left: x + 'px',
-                zIndex: 999
-            }
-        });
-        document.body.prepend(element);
-        return element;
-    }
-
     async function waitFor(elementSel, interval, maxWaitTimes) {
         return new Promise(resolve => {
             let waitTime = 0;
@@ -180,7 +171,7 @@ var $el = (function() {
     }
 
     return {
-        query, includeBootstrapCSS, create, draggablePanel, panel,
+        query, includeBootstrapCSS, create, draggablePanel,
         makeElementDraggable, waitFor, fireEvent, type,
     }
 })();
