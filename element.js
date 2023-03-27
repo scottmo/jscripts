@@ -1,3 +1,7 @@
+// cdn: https://cdn.jsdelivr.net/gh/scottmo/monkeyscripts@main/element.js
+// purge each update https://www.jsdelivr.com/tools/purge
+// git https://github.com/scottmo/monkeyscripts/blob/main/element.js
+
 var $el = (function() {
     function query(selectors) {
         if (typeof selectors === 'string') {
@@ -83,7 +87,7 @@ var $el = (function() {
         );
     }
 
-    function createPanel(title, content, { id = uuidv4(), isDraggable = true, x = 20, y = 20, isVisible = false } = {}) {
+    function createPanel(title, content, { id = uuidv4(), isDraggable = true, x = 20, y = 20, isCollapsed = true } = {}) {
         const panel = create(`
             <div id="header" class="${id}-header">${title}</div>
             <div id="body" class="${id}-body"></div>
@@ -128,7 +132,7 @@ var $el = (function() {
             if (panel.dragged !== 0) return;
             panel.togglePanel();
         });
-        panel.togglePanel(isVisible);
+        panel.togglePanel(!isCollapsed);
 
         if (isDraggable) {
             makeElementDraggable(panel);
