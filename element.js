@@ -22,23 +22,28 @@ var $el = (function() {
         return null;
     }
 
-    function create(html) {
-        const element = document.createElement("DIV");
-		element.innerHTML = html;
-        const ids = [...html.matchAll(/\sid=['"](\w+)["']/g)].map(matchArr => matchArr[1]);
+    function createElement({ api, created, render }) {
+        const container = document.createElement("DIV");
+        Object.assign(container, api);
+        const template = render.call(container);
+		container.innerHTML = template;
+        const ids = [...template.matchAll(/\sid=['"](\w+)["']/g)].map(matchArr => matchArr[1]);
+        const children = {};
         ids.forEach(id => {
-            element["$" + id] = element.querySelector("#" + id);
-            element["$" + id].setAttribute("id", id + "-" + uniqueId());
+            children[id] = container.querySelector("#" + id);
+            children[id].setAttribute("id", id + "-" + uniqueId());
         });
-        return element;
+        container.$ = children;
+        created.call(container, children);
+        
+        return container;
     }
 
     function makeElementDraggable(element) {
         element = query(element);
 
         var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        var headerSelector = `.${element.id}-header`;
-        var header = document.querySelector(headerSelector);
+        var header = element.querySelector(".header");
         if (header) {
             // if present, the header is where you move the DIV from:
             header.onmousedown = dragMouseDown;
@@ -92,56 +97,70 @@ var $el = (function() {
         return "el" + uuidv4().substring(0, 4);
     }
 
-    function createPanel(title, content, { id = uniqueId(), isDraggable = true, x = 20, y = 20, isCollapsed = true } = {}) {
-        const panel = create(`
-            <div id="header" class="${id}-header">${title}</div>
-            <div id="body" class="${id}-body"></div>
-        `);
-        panel.$header.setAttribute('style', `
-            z-index: 999;
-            background-color: #2196F3; 
-            color: #fff;
-            font-weight: bold;
-            font-size: 1.2rem;
-            padding: 5px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 1px 5px 0 rgb(0 0 0 / 20%);
-        `);
-        panel.$body.setAttribute('style', `
-            padding: 5px;
-        `);
-        panel.$body.appendChild(content);
-
-        panel.setAttribute('id', id);
-        panel.setAttribute('style', `
-            z-index: 998;
-            position: absolute;
-            top: ${x}px;
-            left: ${y}px;
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-            background-color: white;
-        `);
-    
-        let isVisible = true;
-        panel.togglePanel = (forceVisible) => {
-        	if (forceVisible != null) {
-        		isVisible = forceVisible;
-        	} else {
-        		isVisible = !isVisible;
-        	}
-            panel.$body.style.display = isVisible ? 'block' : 'none';
+    function formatStyles(style) {
+        if (typeof style === "string") {
+            return style.split("\n").map(s => s.trim()).join("");
         }
-    
-        panel.$header.addEventListener('click', function(event) {
-            if (panel.dragged !== 0) return;
-            panel.togglePanel();
+        return Object.keys(style).reduce((acc, key) => (
+            acc + key.split(/(?=[A-Z])/).join('-').toLowerCase() + ':' + style[key] + ';'
+        ), '');
+    }
+
+    function createPanel(title, content, { isDraggable = true, x = 20, y = 20, isCollapsed = false } = {}) {
+        const panel = createElement({
+            api: {
+                isCollapsed: false,
+                togglePanel: function(isShown) {
+                    if (isShown != null) {
+                        this.isCollapsed = !isShown;
+                    } else {
+                        this.isCollapsed = !this.isCollapsed;
+                    }
+                    this.$.body.style.display = this.isCollapsed ? 'none' : 'block';
+                },
+            },
+            created({ panel, header, body }) {
+                if (isDraggable) {
+                    makeElementDraggable(panel);
+                }
+                body.appendChild(content);
+                header.addEventListener('click', () => {
+                    if (panel.dragged !== 0) return;
+                    this.togglePanel();
+                });
+                this.togglePanel(!isCollapsed);
+            },
+            render() {
+                const panelStyles = formatStyles(`
+                    z-index: 998;
+                    position: absolute;
+                    top: ${x}px;
+                    left: ${y}px;
+                    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+                    background-color: white;
+                `);
+                const headerStyles = formatStyles(`
+                    z-index: 999;
+                    background-color: #2196F3; 
+                    color: #fff;
+                    font-weight: bold;
+                    font-size: 1.2rem;
+                    padding: 5px;
+                    text-align: center;
+                    cursor: pointer;
+                    box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 1px 5px 0 rgb(0 0 0 / 20%);
+                `);
+                const bodyStyles = formatStyles(`
+                    padding: 5px;
+                `);
+                return `
+                    <div id="panel" style="${panelStyles}">
+                        <div id="header" class="header" style="${headerStyles}">${title}</div>
+                        <div id="body" class="body" style="${bodyStyles}"></div>
+                    </div>
+                `;
+            }
         });
-        panel.togglePanel(!isCollapsed);
-
-        if (isDraggable) {
-            makeElementDraggable(panel);
-        }
 
         document.body.appendChild(panel);
         return panel;
@@ -185,7 +204,7 @@ var $el = (function() {
     }
 
     return {
-        query, includeBootstrapCSS, create, createPanel,
+        query, includeBootstrapCSS, createElement, createPanel, formatStyles,
         makeElementDraggable, waitFor, fireEvent, type,
     }
 })();
