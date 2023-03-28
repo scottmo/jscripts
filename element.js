@@ -22,7 +22,7 @@ var $el = (function() {
         return null;
     }
 
-    function createElement({ api, created, render }) {
+    function createElement({ api = {}, created, render }) {
         const container = document.createElement("DIV");
         Object.assign(container, api);
         const template = render.call(container);
@@ -34,8 +34,9 @@ var $el = (function() {
             children[id].setAttribute("id", id + "-" + uniqueId());
         });
         container.$ = children;
-        created.call(container, children);
-        
+        if (typeof created === "function") {
+            created.call(container, children);
+        }
         return container;
     }
 
