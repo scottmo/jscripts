@@ -1,4 +1,6 @@
 $.css = function(node, styles) {
+    node = $(node);
+
     let stylesStr;
     if (/^[\w-]+$/.test(styles)) {
         const cssProp = styles;

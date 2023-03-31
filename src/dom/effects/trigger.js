@@ -1,6 +1,6 @@
-$.trigger = function(element, eventName) {
-    element = $(element);
+$.trigger = function(node, eventName) {
+    node = $(node);
     const event = new Event(eventName, { bubbles: true});
     event.simulated = true;
-    element.dispatchEvent(event);    
+    node.dispatchEvent(event);    
 }
