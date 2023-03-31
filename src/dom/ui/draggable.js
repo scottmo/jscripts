@@ -1,6 +1,6 @@
 $.prototype.draggable = function() {
-    this.each(function(node) {
-        node = $(node).first();
+    this.each(function() {
+        const node = $(this).first();
 
         var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
         var header = node.querySelector(".header");
