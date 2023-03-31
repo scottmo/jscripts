@@ -1,5 +1,5 @@
 $.component = function({ host, api = {}, css = {}, html, created } = {}) {
-    const cmp = u(html);
+    const cmp = $(html);
     const element = cmp.first();
     for (const [key, value] of Object.entries(css)) {
         if (cmp.hasClass(key.substring(1))) {

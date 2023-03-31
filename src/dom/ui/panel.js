@@ -1,5 +1,5 @@
 $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDisplayed = true } = {}) {
-    const cmp = u.component({
+    const cmp = $.component({
         css: {
             ".panel":{
                 "z-index": "998",
@@ -41,12 +41,12 @@ $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDispl
                 } else {
                     this.isDisplayed = !this.isDisplayed;
                 }
-                u(this).find(".body").css({ "display": this.isDisplayed ? 'block' : 'none' });
+                $(".body", this).css({ "display": this.isDisplayed ? 'block' : 'none' });
             },
         },
         created() {
-            u(this).find(".body").append(content);
-            u(this).find(".header").on("click", () => {
+            $(".body", this).append(content);
+            $(".header", this).on("click", () => {
                 if (this.dragged !== 0) return;
                 this.toggle();
             });
