@@ -49,7 +49,7 @@ $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDispl
             const { panel, header, body } = this.$;
             body.appendChild(content);
             header.addEventListener("click", () => {
-                if (this.dragged !== 0) return;
+                if (panel.dragged !== 0) return;
                 this.toggle();
             });
             this.toggle(isDisplayed);
