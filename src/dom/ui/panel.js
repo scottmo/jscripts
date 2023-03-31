@@ -45,8 +45,7 @@ $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDispl
                 $.css(this.$.body, { "display": this.isDisplayed ? 'block' : 'none' });
             },
         },
-        created() {
-            const { panel, header, body } = this.$;
+        created({ panel, header, body }) {
             body.appendChild(content);
             header.addEventListener("click", () => {
                 if (panel.dragged !== 0) return;

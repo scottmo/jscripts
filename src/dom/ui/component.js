@@ -18,7 +18,7 @@ $.component = function({ host, api = {}, css = {}, html, created } = {}) {
     });
     cmp.$ = children;
     if (typeof created === "function") {
-        created.call(cmp);
+        created.call(cmp, children);
     }
     // mount
     if (host) {
