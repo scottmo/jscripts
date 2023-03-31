@@ -10,7 +10,7 @@ $.component = function({ host, api = {}, css = {}, html, created } = {}) {
     // set apis
     Object.assign(cmp, api);
     // init
-    const ids = [...template.matchAll(/\sid=['"](\w+)["']/g)].map(matchArr => matchArr[1]);
+    const ids = [...html.matchAll(/\sid=['"](\w+)["']/g)].map(matchArr => matchArr[1]);
     const children = {};
     ids.forEach(id => {
         children[id] = cmp.querySelector("#" + id);
