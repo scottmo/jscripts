@@ -1,6 +1,6 @@
 $.prototype.draggable = function() {
     this.each(function() {
-        const node = $(this).first();
+        const node = $(this).node();
 
         if (!node.querySelector) return;
 
