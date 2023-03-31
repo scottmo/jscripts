@@ -1,5 +1,10 @@
 $.css = function(node, styles) {
     let stylesStr;
+    if (/^[\w-]+$/.test(styles)) {
+        const cssProp = styles;
+        return getComputedStyle(node).getPropertyValue(cssProp);
+    }
+
     if (typeof styles === "string") {
         stylesStr = styles.split("\n").map(s => s.trim()).join("");
     } else {
@@ -7,6 +12,12 @@ $.css = function(node, styles) {
             acc + key.split(/(?=[A-Z])/).join('-').toLowerCase() + ':' + styles[key] + ';'
         ), '');
     }
+
+    const existingStyles = node.getAttribute("style");
+    if (existingStyles) {
+        stylesStr = existingStyles + ";" + stylesStr;
+    }
+
     node.setAttribute("style", stylesStr);
 }
 

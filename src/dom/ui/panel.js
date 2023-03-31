@@ -34,24 +34,13 @@ $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDispl
                 <div id="body" class="body"></div>
             </div>
         `,
-        api: {
-            isDisplayed: false,
-            toggle(shouldDisplay) {
-                if (shouldDisplay != null) {
-                    this.isDisplayed = shouldDisplay;
-                } else {
-                    this.isDisplayed = !this.isDisplayed;
-                }
-                $.css(this.$.body, { "display": this.isDisplayed ? 'block' : 'none' });
-            },
-        },
         created({ panel, header, body }) {
             body.appendChild(content);
             header.addEventListener("click", () => {
                 if (panel.dragged !== 0) return;
-                this.toggle();
+                $.toggle(body);
             });
-            this.toggle(isDisplayed);
+            $.toggle(body, isDisplayed);
 
             if (isDraggable) {
                 $.draggable(panel);
