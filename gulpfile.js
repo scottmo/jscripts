@@ -8,9 +8,7 @@ const DEST = "dist";
 function dom() {
     const dir = "dom";
     return gulp.src(`src/${dir}/**/*.js`)
-        .pipe(concat(`${dir}.js`))
-        .pipe(gulp.dest(DEST))
-        .pipe(rename(`${dir}.min.js`))
+        .pipe(concat(`${dir}.min.js`))
         .pipe(uglify())
         .pipe(gulp.dest(DEST));
 }
