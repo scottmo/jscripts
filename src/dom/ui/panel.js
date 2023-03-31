@@ -29,7 +29,7 @@ $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDispl
             }
         },
         html: `
-            <div class="panel">
+            <div id="panel" class="panel">
                 <div id="header" class="header">${title}</div>
                 <div id="body" class="body"></div>
             </div>
@@ -46,18 +46,19 @@ $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDispl
             },
         },
         created() {
-            const { header, body } = this.$;
+            const { panel, header, body } = this.$;
             body.appendChild(content);
             header.addEventListener("click", () => {
                 if (this.dragged !== 0) return;
                 this.toggle();
             });
             this.toggle(isDisplayed);
+
+            if (isDraggable) {
+                $.draggable(panel);
+            }
         }
     });
-    if (isDraggable) {
-        $.draggable(cmp);
-    }
 
     return cmp;
 };
