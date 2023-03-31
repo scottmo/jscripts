@@ -1,5 +1,6 @@
 $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDisplayed = true } = {}) {
     const cmp = $.component({
+        host: "body",
         css: {
             ".panel":{
                 "z-index": "998",
@@ -29,8 +30,8 @@ $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDispl
         },
         html: `
             <div class="panel">
-                <div class="header">${title}</div>
-                <div class="body"></div>
+                <div id="header" class="header">${title}</div>
+                <div id="body" class="body"></div>
             </div>
         `,
         api: {
@@ -41,12 +42,13 @@ $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDispl
                 } else {
                     this.isDisplayed = !this.isDisplayed;
                 }
-                $(".body", this).css({ "display": this.isDisplayed ? 'block' : 'none' });
+                $.css(this.$.body, { "display": this.isDisplayed ? 'block' : 'none' });
             },
         },
         created() {
-            $(".body", this).append(content);
-            $(".header", this).on("click", () => {
+            const { header, body } = this.$;
+            body.appendChild(content);
+            header.addEventListener("click", () => {
                 if (this.dragged !== 0) return;
                 this.toggle();
             });
@@ -54,9 +56,8 @@ $.panel = function(title, content, { isDraggable = true, x = 20, y = 20, isDispl
         }
     });
     if (isDraggable) {
-        cmp.draggable();
+        $.draggable(cmp);
     }
-    $("body").append(cmp);
 
     return cmp;
 };

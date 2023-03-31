@@ -1,7 +1,5 @@
-$.prototype.type = function(value) {
-    return this.each(function() {
-      this.val(value);
-      this.trigger("input");
-      this.trigger("change");
-    });
-};
+$.type = function(node, value) {
+    $.val(node, value);
+    $.trigger(node, "input");
+    $.trigger(node, "change");
+}

@@ -1,18 +1,28 @@
 $.component = function({ host, api = {}, css = {}, html, created } = {}) {
-    const cmp = $(html.trim());
-    const element = cmp.first();
+    const cmp = document.createElement("DIV");
+    // render
+    cmp.innerHTML = html;
     for (const [key, value] of Object.entries(css)) {
-        if (cmp.hasClass(key.substring(1))) {
-            cmp.css(value);
-        }
-        cmp.find(key).css(value);
+        cmp.querySelectorAll(key).forEach(node => {
+            $.css(node, value);
+        });
     }
-    Object.assign(element, api);
+    // set apis
+    Object.assign(cmp, api);
+    // init
+    const ids = [...template.matchAll(/\sid=['"](\w+)["']/g)].map(matchArr => matchArr[1]);
+    const children = {};
+    ids.forEach(id => {
+        children[id] = cmp.querySelector("#" + id);
+        children[id].setAttribute("id", id + "-" + $.uuid(4));
+    });
+    cmp.$ = children;
     if (typeof created === "function") {
-        created.call(element);
+        created.call(cmp);
     }
+    // mount
     if (host) {
-        $(host).append(cmp);
+        $(host).appendChild(cmp);
     }
     return cmp;
-};
+}
